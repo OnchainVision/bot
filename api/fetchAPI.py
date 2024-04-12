@@ -276,12 +276,13 @@ def fetch_pair_data(selected_pair, time_range, reversed=False, force_update=0):
         print('Error fetching pair data:', e)
         return None
 
-def fetch_on_chain_pair_price(selected_pair, length, token0 = None, token1 = None):
-    if not selected_pair:
+def fetch_on_chain_pair_price(pair, length, token0 = None, token1 = None):
+    if not pair:
         return None  # Don't fetch if no pair is selected
-    print('Fetching PairData for pair address:', selected_pair)
+    print('Fetching PairData for pair address:', pair['address'])
+    print('Fetching PairData for pair:', pair)
 
-    api_url = f"{API_URL}/api/dex/pairTxns/?address={selected_pair}{f'&length={length}' if length else ''}"
+    api_url = f"{API_URL}/api/dex/pairTxns/?address={pair['address']}{f'&length={length}' if length else ''}"
     
     try:
         print("fetch_on_chain_pair_price: apiUrl", api_url)
@@ -290,16 +291,17 @@ def fetch_on_chain_pair_price(selected_pair, length, token0 = None, token1 = Non
         response.raise_for_status()  # Raise exception for non-OK responses
         
         data = response.json()
-        print("fetch_on_chain_pair_price response ok", data)
+        # print("fetch_on_chain_pair_price response ok", data)
 
         cdata = []
         for d in data:
+            print(d)
             my_date = datetime.strptime(d['timestamp'], '%Y-%m-%dT%H:%M:%SZ')
             price = -1
-            if token0 == d['token0'] and d['tokenBBalance'] != 0:
-                price = float(d['tokenABalance']) / float(d['tokenBBalance'])
-            elif token0 == d['token1'] and ['tokenABalance'] != 0:
-                price = float(d['tokenBBalance']) / float(d['tokenABalance'])
+            if (d['buyToken0'] and pair['tokenA'] == token0['address']) or (d['buyToken0'] == False and pair['tokenB'] == token0['address']):
+                price = float(d['valueToken0']) / float(d['valueToken1'])
+            else:
+                price = float(d['valueToken1']) / float(d['valueToken0'])
 
             mapped_data = {
                 'time': my_date,  # Convert the timestamp to a datetime object

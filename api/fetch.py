@@ -65,7 +65,7 @@ def fetch_exchange(exchange=EXCHANGE_DEFAULT):
     else:
         return my_exchange
 
-def fetch_pair_price(token_input, exchange=EXCHANGE_DEFAULT, against_token=TOKEN_NAME_AGAINST, time_range='1d'):
+def fetch_pair_price(token_input, against_token=TOKEN_NAME_AGAINST, exchange=EXCHANGE_DEFAULT):
     # Get the token
     token0 = fetch_token(token_input)
     token1 = fetch_token(against_token)
@@ -81,7 +81,7 @@ def fetch_pair_price(token_input, exchange=EXCHANGE_DEFAULT, against_token=TOKEN
         return None
 
     # Fetch the pair data
-    df = fetch_on_chain_pair_price(pairs['address'], time_range)
+    df = fetch_on_chain_pair_price(pairs[0], 5000, token0, token1)
 
     return df
 

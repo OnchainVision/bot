@@ -60,11 +60,27 @@ async def price(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Send a message when the command /chart is issued."""
     user = update.effective_user
 
-    file = create_graph_price()
+    # Get arguments
+    token1 = context.args[0].lower() if len(context.args) > 0 else 'btc'
+    token2 = context.args[1].lower() if len(context.args) > 1 else 'usdt'
+    exchange = context.args[2].lower() if len(context.args) > 2 else 'sunswap'
+
+    if token1 == 'trx':
+        token1 = 'wtrx'
+
+    if token2 == 'trx':
+        token2 = 'wtrx'
+
+    # Check exchanges
+    if exchange not in ['sunswap', 'jm', 'iswapv1', 'iswapv2', "sunswap", "jm", "iswapv1", "iswapv2"]:
+        await update.message.reply_text(f"Invalid exchange {exchange}. Please use one of the following: sunswap, iswapv1, iswapv2, jm")
+        return
+
+    data = create_graph_price(token1, token2, exchange)
 
     await update.message.reply_photo(
-        photo=file,
-        caption="gm!",
+        photo=data['file'],
+        caption=data['msg'],
     )
 
 

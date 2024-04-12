@@ -60,16 +60,19 @@ def create_chart(token_name = 'btc', token_again = 'usdt', exchange = 'sunswap',
     return img_bytes
 
 
-def create_graph_price(token_name = 'btc'):
+def create_graph_price(token1, token2, exchange):
     # Add trace
-    selected_pair = 'TTQpjqQUjMJjF3MAvWWVURn3YrRxg2quTM'
-    time_range = '1h'
-
-    df = fetch_pair_price(token_name)
+    df = fetch_pair_price(token1, token2, exchange)
 
     # Iterate over all list and get a list of df['time']
     times = [df[i]['time'] for i in range(len(df))]
     prices = [df[i]['price'] for i in range(len(df))]
+
+    last_price = prices[-1]
+    last_time = times[-1]
+    start_time = times[0]
+    length = len(prices)
+    avg_price = sum(prices) / len(prices)
 
 
     fig = go.Figure()
@@ -98,7 +101,18 @@ def create_graph_price(token_name = 'btc'):
     fig.update_layout(template="plotly_white")
     # img_bytes = fig.to_image(format="png", width=fig.layout.width, height=fig.layout.height)
     img_bytes = fig.to_image(format="png", width=600, height=350, scale=2)
-    return img_bytes
+    msg = f"""
+DEX data 🗃️ for {exchange}:
+
+👉Last price for {token1} is {last_price} {token2} 
+
+📐 Average price for {token1} is {avg_price} {token2}
+
+🕘Last time traded: {last_time} UTC
+
+With a total of {length} trades since {start_time} UTC
+"""
+    return {'file': img_bytes, 'msg': msg}
 
 
 def create_figure(token_name = 'btc'):
