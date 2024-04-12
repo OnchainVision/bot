@@ -1,0 +1,23 @@
+# Ignore all .log files
+*.log
+
+# Ignore all .tmp files
+*.tmp
+
+# Ignore all .env files (commonly used for environment variables)
+.env
+
+# Ignore all .pyc files (created by Python)
+*.pyc
+
+# Ignore artifacts and cache folder
+artifacts/
+cache/
+node_modules/
+.openzeppelin
+typechain-types/
+__py_cache__/
+
+# Ignore all firestore files
+db/firebase.json
+db/firebase_bttc.json
