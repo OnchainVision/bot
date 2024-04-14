@@ -54,7 +54,6 @@ def fetch_on_chain_single_pair(pair_address):
 
         data = response.json()
         my_pair = data[0]
-        print('fetch_on_chain_single_pair: Pair done', my_pair)
 
         # Cache the fetched data
         cachePairData[pair_address] = my_pair
@@ -242,7 +241,7 @@ def fetch_pair_data(selected_pair, time_range, reversed=False, force_update=0):
     cache_key = f"{selected_pair}_{time_range}_reversed" if reversed else f"{selected_pair}_{time_range}"
     print("fetchPairData: cacheKey", cache_key)
 
-    api_url = f"{API_URL}/api/dex/pairAudit/?address={selected_pair}{'&forceUpdate=1' if force_update else ''}&timeRange={time_range.lower()}{ '&reversed=1' if reversed else ''}"
+    api_url = f"{API_URL}/api/dex/pairAudit/?address={selected_pair}{'&forceUpdate=1' if force_update else ''}&timeRange={time_range.lower()}{ '&reversed=true' if reversed else ''}"
     
     try:
         print("fetchPairData: apiUrl", api_url)
@@ -251,7 +250,7 @@ def fetch_pair_data(selected_pair, time_range, reversed=False, force_update=0):
         response.raise_for_status()  # Raise exception for non-OK responses
         
         data = response.json()
-        print("fetchPairData response ok", data)
+        print("fetchPairData response ok")
 
         cdata = []
         for d in data:
@@ -262,13 +261,12 @@ def fetch_pair_data(selected_pair, time_range, reversed=False, force_update=0):
                 'high': float(d['high']),
                 'low': float(d['low']),
                 'close': float(d['close']),
+                'volumeTokenA': float(d['volumeTokenA']),
+                'volumeTokenB': float(d['volumeTokenB']),
             }
             cdata.append(mapped_data)
 
         cdata.sort(key=lambda x: x['time'])  # Sort based on timestamps
-
-        print('Fetch pair data done')
-        print(cdata)
 
         return cdata
 
@@ -276,7 +274,7 @@ def fetch_pair_data(selected_pair, time_range, reversed=False, force_update=0):
         print('Error fetching pair data:', e)
         return None
 
-def fetch_on_chain_pair_price(pair, length, token0 = None, token1 = None):
+def fetch_on_chain_pair_price(pair, length, token0 = None, token1 = None, reversed= False):
     if not pair:
         return None  # Don't fetch if no pair is selected
     print('Fetching PairData for pair address:', pair['address'])
@@ -295,13 +293,18 @@ def fetch_on_chain_pair_price(pair, length, token0 = None, token1 = None):
 
         cdata = []
         for d in data:
-            print(d)
             my_date = datetime.strptime(d['timestamp'], '%Y-%m-%dT%H:%M:%SZ')
             price = -1
             if (d['buyToken0'] and pair['tokenA'] == token0['address']) or (d['buyToken0'] == False and pair['tokenB'] == token0['address']):
-                price = float(d['valueToken0']) / float(d['valueToken1'])
+                if reversed:
+                    price = float(d['valueToken1']) / float(d['valueToken0'])
+                else:
+                    price = float(d['valueToken0']) / float(d['valueToken1'])
             else:
-                price = float(d['valueToken1']) / float(d['valueToken0'])
+                if reversed:
+                    price = float(d['valueToken0']) / float(d['valueToken1'])
+                else:
+                    price = float(d['valueToken1']) / float(d['valueToken0'])
 
             mapped_data = {
                 'time': my_date,  # Convert the timestamp to a datetime object
@@ -310,9 +313,6 @@ def fetch_on_chain_pair_price(pair, length, token0 = None, token1 = None):
             cdata.append(mapped_data)
 
         cdata.sort(key=lambda x: x['time'])  # Sort based on timestamps
-
-        print('fetch_on_chain_pair_price data done')
-        print(cdata)
 
         return cdata
 
@@ -329,7 +329,8 @@ def fetch_pair_analyze(selected_pair, time_range, reversed=False, force_update=0
     cache_key = f"{selected_pair}_{time_range}_reversed" if reversed else f"{selected_pair}_{time_range}"
     print("fetch_pair_analyze: cacheKey", cache_key)
 
-    api_url = f"{API_URL}/api/dex/pairAnalyse/?address={selected_pair}{'&forceUpdate=1' if force_update else ''}&timeRange={time_range.lower()}{ '&reversed=1' if reversed else ''}"
+    api_url = f"{API_URL}/api/dex/pairAnalyse/?address={selected_pair}{'&forceUpdate=1' if force_update else ''}&timeRange={time_range.lower()}{ '&reversed=true' if reversed else ''}"
+    print("fetch_pair_analyze: apiUrl", api_url)
     
     try:
         print("fetch_pair_analyze: apiUrl", api_url)
@@ -338,7 +339,6 @@ def fetch_pair_analyze(selected_pair, time_range, reversed=False, force_update=0
         response.raise_for_status()  # Raise exception for non-OK responses
         
         data = response.json()
-        print("fetch_pair_analyze response ok", data)
 
         return data
 

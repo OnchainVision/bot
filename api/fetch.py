@@ -72,16 +72,21 @@ def fetch_pair_price(token_input, against_token=TOKEN_NAME_AGAINST, exchange=EXC
     exchange = fetch_exchange(exchange)
 
     pairs = fetch_on_chain_pairs(exchange=exchange['id'], token0=token0['address'], token1=token1['address'])
+    reversed = False
 
     if len(pairs) == 0:
-        print(f'fetch_pair_price: No pairs found for token="{token_input}" and exchange="{exchange}"')
-        return None
+        print(f'fetch_pair_price: No pairs found for token="{token_input}/{against_token}" and exchange="{exchange}"')
+        pairs = fetch_on_chain_pairs(exchange=exchange['id'], token0=token1['address'], token1=token0['address'])
+        reversed = True
+        if len(pairs) == 0:
+            print(f'fetch_pair_price: No pairs found for against_token="{against_token}/{token_input}" and exchange="{exchange}"')
+            return None
     elif len(pairs) > 1:
         print(f'fetch_pair_price: Multiple pairs found for token="{token_input}" and exchange="{exchange}"')
         return None
 
     # Fetch the pair data
-    df = fetch_on_chain_pair_price(pairs[0], 5000, token0, token1)
+    df = fetch_on_chain_pair_price(pairs[0], 5000, token0, token1, reversed)
 
     return df
 
