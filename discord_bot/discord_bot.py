@@ -3,9 +3,10 @@ from nextcord import Intents, Client, Message, Embed, File, ActionRow, ButtonSty
 from nextcord.ui import Button
 from nextcord.ext import commands
 
-from .cog.Wallet import Wallet
-from .cog.Balance import Balance
+# from .cog.Wallet import Wallet
+# from .cog.Balance import Balance
 from .cog.Start import Start
+from .cog.Chart import Chart
 
 from typing import Final
 from time import sleep
@@ -35,22 +36,6 @@ intents.members = True
 # client: Client = Client(intents=intents)
 bot = commands.Bot(command_prefix='/', description=description, intents=intents)
 
-# STEP 2: MESSAGE FUNCTIONALITY
-# async def send_message(message: Message, user_message: str) -> None:
-#     if not user_message:
-#         print('(Message was empty because intents were not enabled probably)')
-#         return
-
-#     if is_private := user_message[0] == '?':
-#         user_message = user_message[1:]
-
-#     try:
-#         response: str = get_response(user_message)
-#         await message.author.send(response) if is_private else await message.channel.send(response)
-#     except Exception as e:
-#         print(e)
-
-
 # STEP 3: HANDLING THE STARTUP FOR OUR BOT
 @bot.event
 async def on_ready() -> None:
@@ -59,27 +44,28 @@ async def on_ready() -> None:
 
 
 # Define the price command
-@bot.command(description='Check the price of a token.')
-async def price(ctx, amount: int, receiver: str):
-    """SCheck the price of a token."""
-    sender = ctx.author
-    await ctx.send(
-        f"Price undef"
-    )
+# @bot.command(description='Check the price of a token.')
+# async def price(ctx, amount: int, receiver: str):
+#     """SCheck the price of a token."""
+#     sender = ctx.author
+#     await ctx.send(
+#         f"Price undef"
+#     )
 
 
-@bot.command(description='Command for a chart onchain')
-async def chart(ctx):
-    """Send a message when the command /gm is issued."""
-    user = ctx.author
-    imgBytes = create_chart()
-    # Create a BytesIO object from the image bytes
-    img_bytes_io = io.BytesIO(imgBytes)
-    await ctx.send(file=File(fp=img_bytes_io, filename='image.png'))
+# @bot.command(description='Command for a chart onchain')
+# async def chart(ctx):
+#     """Send a message when the command /gm is issued."""
+#     user = ctx.author
+#     imgBytes = create_chart()
+#     # Create a BytesIO object from the image bytes
+#     img_bytes_io = io.BytesIO(imgBytes)
+#     await ctx.send(file=File(fp=img_bytes_io, filename='image.png'))
 
 
 def run_bot_discord():
     """Run the Discord bot."""
     # Run the bot
-    # bot.add_cog(Start(bot))
+    bot.add_cog(Start(bot))
+    bot.add_cog(Chart(bot))
     bot.run(TOKEN)
